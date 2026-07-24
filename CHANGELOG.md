@@ -30,3 +30,15 @@
 - 원본 템플릿의 `.claude/rules/`(언어·코딩 원칙·개발 환경·보안·테스트), `.claude/hooks/`의 기존 5개,
   `.claude/skills/`(13개), `.codex/`, CI/pre-commit/에디터 설정은 1인~4인 템플릿과 동일하게 유지했다 — 팀
   규모와 무관하게 유효한 규칙이기 때문이다.
+
+## 2026-07-24 (CODEOWNERS 변경사항 push 및 병합)
+
+로컬에만 있던 CODEOWNERS 기본 오너 임시 지정 커밋을 GitHub에 반영했다.
+
+- `master`가 보호 브랜치라 직접 push가 거부되어(`GH006`), `chore/push-codeowners-update` 기능
+  브랜치로 push 후 PR(#2)을 생성했다 — team-collaboration.md의 브랜치 전략을 그대로 따른 사례다.
+- CODEOWNERS 기본 오너가 PR 작성자 본인(`@MRJHP`)과 같아 리뷰어로 자신을 지정할 수 없었다(GitHub
+  정책상 작성자는 자기 PR을 리뷰할 수 없음). 아직 팀원이 CODEOWNERS에 실제로 채워지지 않은 초기
+  상태라 리뷰어 없이 CI 통과만 확인하고 병합했다 — 팀원이 합류하면 CODEOWNERS를 실제 핸들로
+  갱신해 이 문제가 재발하지 않도록 해야 한다.
+- 병합 후 로컬/원격 기능 브랜치를 정리했다.
