@@ -5,7 +5,8 @@
 # 브랜치 보호 규칙(main/master)에 켜야 한다.
 
 # 기본 오너 — 아래에서 더 구체적으로 지정하지 않은 모든 경로
-* @your-org/core-reviewers
+# TODO: 팀원이 정해지면 개인 핸들 여러 명 또는 GitHub Team(@MRJHP/core-reviewers 등)으로 교체한다.
+* @MRJHP
 
 # 모듈별 오너십 예시 — 실제 구조에 맞게 채운다
 # /src/auth/       @your-org/auth-team

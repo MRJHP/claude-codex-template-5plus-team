@@ -29,10 +29,7 @@ def current_branch() -> str:
 
 
 def main() -> None:
-    try:
-        json.loads(sys.stdin.read() or "{}")
-    except json.JSONDecodeError:
-        pass
+    sys.stdin.read()  # 다른 hook과 동일한 stdin 프로토콜을 소비만 하고 내용은 쓰지 않는다.
 
     branch = current_branch()
     if branch not in PROTECTED_BRANCHES:
