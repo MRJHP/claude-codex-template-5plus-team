@@ -42,3 +42,25 @@
   상태라 리뷰어 없이 CI 통과만 확인하고 병합했다 — 팀원이 합류하면 CODEOWNERS를 실제 핸들로
   갱신해 이 문제가 재발하지 않도록 해야 한다.
 - 병합 후 로컬/원격 기능 브랜치를 정리했다.
+
+## 2026-07-24 (`uv run` 트램폴린 오류 원인 파악 및 개발 환경 점검)
+
+`uv run pytest`가 `error: uv trampoline failed to canonicalize script path`로 실패하는 문제를
+조사하고 해결했다.
+
+- **원인**: 이 프로젝트 폴더가 원래 `Claude_Codex_최적화_템플릿_...` 이름의 폴더였다가
+  `claude-codex-template-5plus-team`으로 이름이 바뀌면서 만들어졌는데, `.venv`가 그 옛 폴더에서
+  생성된 채로 그대로 옮겨졌다. uv가 만드는 `pytest.exe`/`ruff.exe`/`mypy.exe` 등 CLI 트램폴린
+  실행파일은 생성 시점의 venv 절대경로를 내부에 하드코딩해두는데, 폴더 이름이 바뀌면서 그 경로가
+  더 이상 존재하지 않아 발생한 오류였다 (`python.exe -m pytest`처럼 트램폴린을 거치지 않는 호출은
+  문제없이 동작했다).
+- **조치**: `.venv` 삭제 후 `uv sync`로 현재 경로 기준으로 재생성. 이후 `uv run pytest`,
+  `uv run ruff check`, `uv run ruff format --check`, `uv run mypy` 모두 정상 통과 확인했다.
+- **추가로 발견한 문제**: `.git/hooks/pre-commit`가 설치돼 있지 않았다 — `.git/hooks`는 git이 추적하지
+  않는 로컬 디렉터리라 폴더 이동 과정에서 유실된 것으로 보인다. `uv run pre-commit install`로
+  재설치해 `git commit` 시 자동 실행되도록 복구했다.
+- **Codex 연동 확인**: `mcp__codex__codex` 도구로 테스트 세션을 호출해 정상 응답과 `threadId` 발급을
+  확인했다 — 폴더 이름 변경이 Codex MCP 연동에는 영향을 주지 않았다.
+- 교훈: 프로젝트 폴더를 옮기거나 이름을 바꿀 때는 `.venv`를 반드시 재생성해야 한다
+  (`.git/hooks`도 함께 재설치 필요). [dev-environment.md](../.claude/rules/dev-environment.md)의
+  커밋 전 체크리스트를 실행하기 전에 이 단계를 먼저 거쳐야 한다.
