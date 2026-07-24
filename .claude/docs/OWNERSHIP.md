@@ -4,10 +4,12 @@
 [.github/CODEOWNERS](../../.github/CODEOWNERS)를 함께 갱신한다.
 
 `/init` 스킬로 이 템플릿을 초기화할 때 실제 팀 구성으로 채운다.
+아직 팀원이 다 정해지지 않아, 현재는 `@MRJHP`가 전체 경로의 기본 오너로 지정되어 있다
+(`.github/CODEOWNERS`). 팀원이 합류하면 아래 표와 CODEOWNERS를 모듈별로 세분화한다.
 
 | 영역 | 담당자 | GitHub 핸들 | 비고 |
 |---|---|---|---|
-| 전체 아키텍처 / DESIGN.md | (이름) | @handle | 최종 결정권자 |
+| 전체 (기본 오너) | - | @MRJHP | 팀원 합류 전까지 임시 지정, 모듈별로 세분화 예정 |
 | `src/...` (예시) | (이름) | @handle | |
 | `.github/`, CI/CD | (이름) | @handle | |
 
