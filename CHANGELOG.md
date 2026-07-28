@@ -3,6 +3,21 @@
 이 프로젝트에서 진행한 작업을 날짜순으로 기록한다. 커밋 메시지의 "무엇을"보다
 "왜 그렇게 결정했는지"를 남기는 데 초점을 둔다.
 
+## 2026-07-28
+
+- **Windows 한글 경로에서 pre-commit hook 인코딩 깨지는 문제 발견 및 해결법 기록**: 저장소 경로에
+  `박주형`처럼 한글(비 ASCII)이 포함된 상태에서 `uv run pre-commit install`을 실행하면, `.git/hooks/pre-commit`
+  스크립트에 그 경로를 UTF-8이 아닌 시스템 로케일(CP949)로 잘못 인코딩해서 쓰는 경우가 있었다. Git Bash는
+  hook 스크립트를 UTF-8로 해석하므로 `INSTALL_PYTHON` 경로가 실제 `.venv` 경로와 어긋나
+  `` `pre-commit` not found. Did you forget to activate your virtualenv? `` 에러로 `git commit`이 실패했다.
+  `PYTHONUTF8=1 uv run pre-commit install --overwrite`로 hook을 재설치하면 해결된다. 자매 저장소
+  (`claude-codex-optimized-template-under-4-members`)에서 먼저 발견해 동일하게 반영했다.
+  [dev-environment.md](.claude/rules/dev-environment.md) 참고.
+- **`/init`으로 템플릿 예제를 실제 패키지명으로 교체**: `src/project/__init__.py`,
+  `tests/test_project.py`를 `src/my_project/`, `tests/test_my_project.py`로 바꾸고 `pyproject.toml`의
+  프로젝트명을 갱신했다. 구체적인 실제 기능은 아직 정해지지 않아 `greet` 예제는 그대로 두었다. 이 저장소의
+  `team-collaboration.md` 규칙에 따라 `chore/init-and-precommit-fix` 기능 브랜치 + PR로 반영했다.
+
 ## 2026-07-24 (5인 이상 팀 템플릿으로 구성)
 
 `Claude_Codex_최적화_템플릿_1~4인프로젝트`를 기반으로, 여러 명이 각자 자신의 Claude Code(+Codex CLI)
