@@ -3,6 +3,23 @@
 이 프로젝트에서 진행한 작업을 날짜순으로 기록한다. 커밋 메시지의 "무엇을"보다
 "왜 그렇게 결정했는지"를 남기는 데 초점을 둔다.
 
+## 2026-08-06 (재발 방지: pm.md/codex-system SKILL.md 보호 CI 가드)
+
+- **PR #13 — `guard-team-customization` CI 잡 추가**: 같은 drift가 사람 확인 없이 자동으로
+  재발하지 않도록, `.claude/agents/pm.md`/`.claude/skills/codex-system/SKILL.md`를 변경하는
+  PR은 본문에 `[team-customization-checked]` 문구가 없으면 CI가 실패하게 만들었다. scaffold
+  원본(`claude-codex-scaffold`)이 private이라 실제 바이트 비교(cross-repo checkout)는 PAT
+  시크릿 발급·관리 비용이 커서 채택하지 않고, 시크릿 없이 `GITHUB_TOKEN` 범위 안에서 동작하는
+  "보호 경로 변경 + 사람 확인 문구" 방식을 택했다. 로컬에서 3개 시나리오(무관 변경/확인문구
+  없음/확인문구 있음)로 스크립트를 직접 검증했고, 실제 GitHub Actions에서도 확인문구 없는
+  테스트 PR(#14, 병합하지 않고 close)로 가드가 실제로 실패를 발생시키는 것까지 확인했다.
+  워크스페이스 쪽의 관련 조사·근본 원인 분석은 `_tools/project-hq/README.md`(sync_scaffold.py
+  `INTENTIONALLY_DIVERGED`)에 함께 기록되어 있다.
+- 원본 `claude-codex-scaffold` 저장소의 커밋 `9c306607`이 "1인 개발 기준 범용 버전을 scaffold에
+  추가하되, 5인+ 팀 버전은 OWNERSHIP.md 기반으로 별도 커스터마이징된 상태를 유지"한다고 이미
+  명시했음에도 PR #11이 이를 놓쳤던 것이 근본 원인이었다 — 문서만으로는 같은 실수가 반복될 수
+  있어 CI 단계의 강제 장치를 추가한 것.
+
 ## 2026-08-06 (PR #11 scaffold drift 발견 및 원복)
 
 - **`pm.md`/`codex-system SKILL.md`에 반영된 1인 개발용 drift를 되돌림**: PR #11("scaffold
