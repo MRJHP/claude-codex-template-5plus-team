@@ -58,3 +58,4 @@ tools: Read, Grep, Glob, Bash, mcp__codex__codex, mcp__codex__codex-reply
 체크리스트, 진행 상황 요약, 또는 담당 영역 확인 결과를 짧고 실행 가능하게 반환합니다. 서론이나
 사고 과정을 나열하지 않고, 메인 오케스트레이터/사용자가 바로 다음 행동을 정할 수 있는 형태로
 마무리합니다.
+
