@@ -86,7 +86,7 @@ Codex는 `.mcp.json`에 프로젝트 MCP 서버(`codex mcp-server`)로 등록되
 
 - **CI**: `.github/workflows/ci.yml`이 push/PR마다 `ruff check`, `ruff format --check`, `mypy`, `pytest`를
   실행합니다 (동시 push가 잦은 팀 환경을 고려해 `concurrency` 그룹으로 중복 실행을 취소합니다).
-  `src/`, `tests/`에는 최소 예제(`src/project`, `tests/test_project.py`)가 포함되어 있어 항상
+  `src/`, `tests/`에는 최소 예제(`src/my_project`, `tests/test_my_project.py`)가 포함되어 있어 항상
   통과하며, `/init` 스킬로 실제 프로젝트로 바꿀 때 이 예제를 실제 코드로 교체합니다.
 - **pre-commit**: `.pre-commit-config.yaml`에 ruff check/format, mypy가 로컬 hook으로 등록되어 있습니다.
   `uv run pre-commit install`로 최초 1회 활성화합니다 ([dev-environment.md](.claude/rules/dev-environment.md)).
