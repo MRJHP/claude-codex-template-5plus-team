@@ -3,6 +3,20 @@
 이 프로젝트에서 진행한 작업을 날짜순으로 기록한다. 커밋 메시지의 "무엇을"보다
 "왜 그렇게 결정했는지"를 남기는 데 초점을 둔다.
 
+## 2026-08-06 (PR #11 scaffold drift 발견 및 원복)
+
+- **`pm.md`/`codex-system SKILL.md`에 반영된 1인 개발용 drift를 되돌림**: PR #11("scaffold
+  최신화: pm.md, codex-system SKILL.md drift 반영")이 1인 개발용 프로젝트(`agent-visualizer-hub`)의
+  `pm.md`를 그대로 가져오면서, 이 저장소가 전제로 하는 [team-collaboration.md](.claude/rules/team-collaboration.md),
+  [OWNERSHIP.md](.claude/docs/OWNERSHIP.md), `.claude/docs/handoff/` 관련 내용을 `pm.md`/
+  `codex-system SKILL.md`에서 제거해버렸다. revert 커밋으로 팀 협업 버전으로 되돌린 뒤(브랜치가
+  master 대비 diff 0이 됨), 감사 기록 목적으로 그대로 병합했다.
+- **과거 병합 PR(#1~#10) 재검토**: "Sync scaffold" 계열(#4, #6, #7, #8)과 #10(Codex 리뷰어 캐릭터
+  3명→1명 통합)의 diff를 재확인해 팀 협업 전제를 건드린 항목이 없음을 확인했다 — #10은
+  `.claude/hooks/log-codex-call.py`의 순수 기술 리팩토링만 포함. 추가 조치 불필요.
+- 교훈: scaffold를 다른 저장소에서 "그대로" 동기화할 때는 원본 저장소의 팀 규모 전제(1인 vs
+  5인 이상)가 대상 저장소와 같은지 먼저 확인해야 한다.
+
 ## 2026-08-04 (Codex MCP 서버 등록 `.mcp.json` 반영)
 
 - **`.mcp.json` 신규 추가**: 이 파일이 없으면 `mcp__codex__codex` 도구 자체가 존재하지 않아
