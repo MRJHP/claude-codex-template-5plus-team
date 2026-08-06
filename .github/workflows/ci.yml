@@ -34,3 +34,56 @@ jobs:
 
       - name: pytest
         run: uv run pytest
+
+  guard-team-customization:
+    # 이 저장소(5인 이상 팀 템플릿)는 .claude/agents/pm.md, .claude/skills/codex-system/SKILL.md를
+    # team-collaboration.md/OWNERSHIP.md/handoff 전제를 반영해 scaffold 원본과 의도적으로 다르게
+    # 유지한다. 2026-08-06 PR #11이 이 사실을 모른 채 scaffold sync로 두 파일을 원본 그대로
+    # 덮어써 팀 협업 전제를 깨뜨린 사건이 있었다 — 같은 실수가 자동으로 재발하지 않도록,
+    # 두 파일을 건드리는 PR은 본문에 명시적 확인 문구가 없으면 실패한다.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 팀 커스터마이징 보호 경로 확인
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -eu
+          PROTECTED_FILES=".claude/agents/pm.md
+          .claude/skills/codex-system/SKILL.md"
+
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD)
+
+          HIT=""
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            if printf '%s\n' "$PROTECTED_FILES" | grep -qxF "$f"; then
+              HIT="${HIT}${f}"$'\n'
+            fi
+          done <<EOF
+          $CHANGED_FILES
+          EOF
+
+          if [ -z "$HIT" ]; then
+            echo "보호 경로 변경 없음 — 통과"
+            exit 0
+          fi
+
+          echo "이 PR이 scaffold 원본과 의도적으로 달라야 하는 파일을 변경했습니다:"
+          printf '%s' "$HIT"
+
+          if printf '%s' "$PR_BODY" | grep -q '\[team-customization-checked\]'; then
+            echo "PR 본문에서 확인 문구를 찾았습니다 — 통과"
+            exit 0
+          fi
+
+          echo ""
+          echo "PR 본문에 '[team-customization-checked]' 문구를 추가해, 이 변경이 scaffold를"
+          echo "그대로 반영한 게 아니라 team-collaboration.md/OWNERSHIP.md 전제를 의식하고"
+          echo "검토한 변경임을 명시적으로 확인하세요."
+          exit 1
