@@ -1,3 +1,8 @@
+> **보관(archive) 상태 (2026-08-20)**: 이 템플릿을 실제로 쓰는 5인 이상 팀 프로젝트가 아직 없어
+> `_templates/_archive/`로 옮겨 보관 중입니다. 다른 템플릿(예:
+> `claude-codex-optimized-template-under-4-members`)에 적용하는 규칙 확산 작업 대상에서 제외되며,
+> 실사용이 필요해지면 그때 최신 상태로 다시 점검한 뒤 `_templates/`로 복귀시킵니다.
+
 # Claude + Codex CLI 최적화 템플릿 (5인 이상 팀)
 
 Claude Code와 Codex CLI 2개 도구로 협업하도록 구성된 프로젝트 템플릿입니다.
