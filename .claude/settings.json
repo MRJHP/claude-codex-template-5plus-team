@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/session-start-reminders.py"
+            "command": "python -X utf8 .claude/hooks/session-start-reminders.py"
           }
         ]
       }
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/agent-router.py"
+            "command": "python -X utf8 .claude/hooks/agent-router.py"
           }
         ]
       }
@@ -41,11 +41,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/check-codex-before-write.py"
+            "command": "python -X utf8 .claude/hooks/check-codex-before-write.py"
           },
           {
             "type": "command",
-            "command": "python .claude/hooks/check-branch-before-write.py"
+            "command": "python -X utf8 .claude/hooks/check-branch-before-write.py"
           }
         ]
       },
@@ -54,7 +54,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/check-codex-after-plan.py"
+            "command": "python -X utf8 .claude/hooks/check-codex-after-plan.py"
           }
         ]
       },
@@ -63,7 +63,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/log-codex-call.py"
+            "command": "python -X utf8 .claude/hooks/log-codex-call.py"
           }
         ]
       }
@@ -74,7 +74,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/post-implementation-review.py"
+            "command": "python -X utf8 .claude/hooks/post-implementation-review.py"
           }
         ]
       },
@@ -83,7 +83,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/post-test-analysis.py"
+            "command": "python -X utf8 .claude/hooks/post-test-analysis.py"
           }
         ]
       },
@@ -92,7 +92,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/log-codex-call.py"
+            "command": "python -X utf8 .claude/hooks/log-codex-call.py"
           }
         ]
       }
@@ -103,7 +103,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/log-codex-call.py"
+            "command": "python -X utf8 .claude/hooks/log-codex-call.py"
           }
         ]
       }
