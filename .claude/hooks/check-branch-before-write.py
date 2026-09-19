@@ -3,7 +3,11 @@
 
 main/master 브랜치에서 직접 파일을 수정하려는 경우 기능 브랜치 생성을 '제안'한다.
 5인 이상 팀에서는 여러 명이 동시에 작업하므로 보호 브랜치 직접 수정을 피하는 게 좋다.
-절대 차단하지 않는다 (permissionDecision은 항상 allow).
+절대 차단하지 않는다.
+
+제안은 `hookSpecificOutput.additionalContext`로만 전달한다. `permissionDecision`은 출력하지
+않는다 — PreToolUse에서 `allow`를 내면 사용자 승인 없이 도구가 실행되는 권한 우회가 되고,
+`permissionDecisionReason`은 Claude에게 전달되지도 않는다(2026-09-19 실험, Claude Code 2.1.278).
 """
 
 import json
@@ -37,7 +41,7 @@ def main() -> None:
         sys.exit(0)
 
     log_event("check-branch-before-write", "PreToolUse", triggered=True, detail=branch)
-    reason = (
+    suggestion = (
         f"[check-branch-before-write] 현재 '{branch}' 브랜치에서 직접 작업 중입니다. "
         "5인 이상 팀에서는 main/master에 직접 커밋하지 않고 기능 브랜치를 만드는 것을 권장합니다 "
         "(예: git checkout -b feature/설명). 강제 아님, .claude/rules/team-collaboration.md 참고."
@@ -47,8 +51,7 @@ def main() -> None:
             {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "permissionDecision": "allow",
-                    "permissionDecisionReason": reason,
+                    "additionalContext": suggestion,
                 }
             }
         )

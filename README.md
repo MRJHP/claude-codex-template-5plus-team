@@ -2,6 +2,12 @@
 > `_templates/_archive/`로 옮겨 보관 중입니다. 다른 템플릿(예:
 > `claude-codex-optimized-template-under-4-members`)에 적용하는 규칙 확산 작업 대상에서 제외되며,
 > 실사용이 필요해지면 그때 최신 상태로 다시 점검한 뒤 `_templates/`로 복귀시킵니다.
+>
+> **복귀 전 반드시 확인할 것 (2026-09-20)**: 이 템플릿은 아직 Codex를 `mcp__codex__codex` MCP 도구로
+> 호출하는 구성(`.mcp.json`, hooks, rules, skills, `.codex/`)이다. Codex CLI 0.154.0부터 `codex mcp-server`가
+> 삭제돼 이 경로는 **동작하지 않는다**(2026-09-12 이후 4인 이하 템플릿은 Bash `codex exec`로 전환됨). 복귀
+> 시 `_templates/claude-codex-optimized-template-under-4-members`를 기준으로 Codex 연동 전체를 같은 방식으로
+> 옮겨야 한다. 예외로 PreToolUse 훅 3개의 권한 우회(`permissionDecision: allow`)만 이미 수정했다.
 
 # Claude + Codex CLI 최적화 템플릿 (5인 이상 팀)
 
