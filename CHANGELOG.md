@@ -3,6 +3,15 @@
 이 프로젝트에서 진행한 작업을 날짜순으로 기록한다. 커밋 메시지의 "무엇을"보다
 "왜 그렇게 결정했는지"를 남기는 데 초점을 둔다.
 
+## 2026-09-20 (보관 상태 점검 — 권한 우회 훅 수정)
+
+- **PreToolUse 훅 3개(`check-codex-before-write.py`, `check-codex-after-plan.py`,
+  `check-branch-before-write.py`)가 `permissionDecision: "allow"`를 출력하던 결함 수정**: `allow`는 사용자
+  승인 없이 도구가 실행되게 하고 사유 문구는 Claude에게 전달되지 않는다(2026-09-19 실험, Claude Code
+  2.1.278). `additionalContext`만 출력하도록 바꿨다. 4인 이하 템플릿과 같은 수정이다.
+- README에 복귀 전 확인 사항 추가: Codex 연동이 삭제된 `mcp__codex__codex` 경로 그대로라 복귀 전 전면 전환이 필요하다.
+- 깨진 링크 정정: 2026-07-24 `uv run` 트램폴린 항목의 `dev-environment.md` 상대경로(`../.claude/...`)가 저장소 밖을 가리키고 있었다.
+
 ## 2026-08-06 (재발 방지: pm.md/codex-system SKILL.md 보호 CI 가드)
 
 - **PR #13 — `guard-team-customization` CI 잡 추가**: 같은 drift가 사람 확인 없이 자동으로
@@ -127,5 +136,5 @@
 - **Codex 연동 확인**: `mcp__codex__codex` 도구로 테스트 세션을 호출해 정상 응답과 `threadId` 발급을
   확인했다 — 폴더 이름 변경이 Codex MCP 연동에는 영향을 주지 않았다.
 - 교훈: 프로젝트 폴더를 옮기거나 이름을 바꿀 때는 `.venv`를 반드시 재생성해야 한다
-  (`.git/hooks`도 함께 재설치 필요). [dev-environment.md](../.claude/rules/dev-environment.md)의
+  (`.git/hooks`도 함께 재설치 필요). [dev-environment.md](.claude/rules/dev-environment.md)의
   커밋 전 체크리스트를 실행하기 전에 이 단계를 먼저 거쳐야 한다.

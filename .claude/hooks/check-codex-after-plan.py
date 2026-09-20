@@ -2,7 +2,11 @@
 """PreToolUse hook (matcher: ExitPlanMode).
 
 계획이 확정되어 실행 단계로 넘어가기 직전, 계획 내용이 복잡해 보이면 Codex 리뷰를 '제안'한다.
-절대 차단하지 않는다 (permissionDecision은 항상 allow).
+절대 차단하지 않는다.
+
+제안은 `hookSpecificOutput.additionalContext`로만 전달한다. `permissionDecision`은 출력하지
+않는다 — PreToolUse에서 `allow`를 내면 사용자 승인 없이 도구가 실행되는 권한 우회가 되고,
+`permissionDecisionReason`은 Claude에게 전달되지도 않는다(2026-09-19 실험, Claude Code 2.1.278).
 """
 
 import json
@@ -40,7 +44,7 @@ def main() -> None:
     log_event(
         "check-codex-after-plan", "PreToolUse", triggered=True, detail=f"plan_len={len(plan_text)}"
     )
-    reason = (
+    suggestion = (
         "[check-codex-after-plan] 계획이 크거나 되돌리기 어려운 변경을 포함하는 것으로 보입니다. "
         "실행에 들어가기 전에 mcp__codex__codex로 Codex에게 계획 리뷰를 받아볼 것을 제안합니다 "
         "(강제 아님)."
@@ -50,8 +54,7 @@ def main() -> None:
             {
                 "hookSpecificOutput": {
                     "hookEventName": "PreToolUse",
-                    "permissionDecision": "allow",
-                    "permissionDecisionReason": reason,
+                    "additionalContext": suggestion,
                 }
             }
         )

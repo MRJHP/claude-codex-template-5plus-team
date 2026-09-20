@@ -21,18 +21,20 @@ description: Codex CLI 연계 구조를 자세히 설명한다. Codex를 언제/
 
 ## Hook은 강제가 아니라 제안
 
-`.claude/hooks/`의 8개 hook은 전부 **차단하지 않는다** (`permissionDecision: allow` 또는 `additionalContext`만
-반환). 이 중 7개(`session-start-reminders.py`, `agent-router.py`, `check-codex-before-write.py`,
+`.claude/hooks/`의 hook은 전부 **차단하지 않는다** (`additionalContext`로 제안만 하거나 로그만 남긴다).
+이 중 제안 훅(`session-start-reminders.py`, `agent-router.py`, `check-codex-before-write.py`,
 `check-branch-before-write.py`, `check-codex-after-plan.py`, `post-implementation-review.py`,
-`post-test-analysis.py`)는 Codex 위임이나 브랜치 전환을 제안하거나 세션 시작 시 컨텍스트를
-상기시키는 훅이고, `log-codex-call.py` 1개는 실제 Codex 호출이 일어났을 때 그 사실을 로그로
+`post-test-analysis.py`)은 Codex 위임이나 브랜치 전환을 제안하거나 세션 시작 시 컨텍스트를
+상기시키는 훅이고, `log-codex-call.py`는 실제 Codex 호출이 일어났을 때 그 사실을 로그로
 남기는 훅이다. 즉:
 
 - Hook이 "Codex 상담을 제안합니다"라고 메시지를 띄워도, 그 작업이 계속 진행된다.
 - Codex를 실제로 호출할지 말지는 Claude가 [codex-delegation.md](../../rules/codex-delegation.md) 기준으로
   스스로 판단한다.
-- Hook 로직을 더 엄격하게(차단형으로) 바꾸고 싶다면 각 hook의 `permissionDecision`을 `"ask"`나 `"deny"`로
-  바꾸면 된다.
+- 제안 훅은 `permissionDecision`을 출력하지 않는다. PreToolUse에서 `"allow"`를 내면 사용자 승인 없이
+  도구가 실행되는 권한 우회가 되고 사유 문구도 Claude에게 전달되지 않는다(2026-09-19 실험).
+- Hook 로직을 더 엄격하게(차단형으로) 바꾸고 싶다면 그 hook에 `permissionDecision`을 `"ask"`나
+  `"deny"`로 새로 추가하면 된다.
 
 ## 언제 Codex를 부르나 (요약)
 
