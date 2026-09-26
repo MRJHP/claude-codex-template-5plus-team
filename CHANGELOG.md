@@ -3,6 +3,34 @@
 이 프로젝트에서 진행한 작업을 날짜순으로 기록한다. 커밋 메시지의 "무엇을"보다
 "왜 그렇게 결정했는지"를 남기는 데 초점을 둔다.
 
+## 2026-09-26 (2차: 작업 유형별 모델 고정 에이전트 + agent-router 모델 힌트)
+
+- **배경**: 4인 이하 템플릿이 같은 날 커밋 `4fd6787`로 "작업 유형에 따라 모델이 바뀌게" 요청에
+  대응했다(기존 "Agent 모델 선택" 규칙은 매 호출마다 Claude 판단에 맡겨져 있고 자동화 장치가
+  없었다). 이 저장소(5인 팀용)도 같은 문제를 겪고 있어 그 구현을 팀 구조(브랜치 보호,
+  `pm.md`/`codex-system` CI 가드, `check-branch-before-write.py`)에 맞춰 옮겼다.
+- **에이전트 4개 신설** (`.claude/agents/`, 루브릭 `harness-lab/references/agent-design.md` 기준):
+  `explorer`(Haiku, 읽기 전용 조사), `implementer`(Sonnet, 확립된 패턴 구현·게이트 실행·Codex
+  상담, main/master 직접 작업 금지·기능 브랜치 사용을 명시), `architect`(Opus, 설계·상충 해소·깊은
+  리뷰, 파일 수정 없음), `verifier`(Fable, 장시간 전수 점검·다단계 검증, `Write`는 자기 산출물만).
+  기존 `pm.md`는 팀 협업용으로 `INTENTIONALLY_DIVERGED`(2026-08-06) 상태라 본문은 그대로 두고
+  frontmatter에 `model: sonnet`만 추가했다. `general-purpose`는 세션 상속 그대로(전용 에이전트가
+  아니므로 모델 고정 대상이 아님).
+- **`agent-router.py` 확장**: 이 저장소 고유 `SKILL_HINTS`(팀 전용 스킬 문구 포함)는 그대로 두고,
+  입력에서 작업 유형을 추정해 "위임한다면 `explorer`(Haiku) 권장"식 힌트를 추가했다. 우선순위는
+  verifier > architect > implementer > explorer(깊은 추론이 필요한 쪽 우선, "찾아서 고쳐줘"는
+  구현). 메인 세션 모델은 바뀌지 않는다고 명시한다. `_hooklog.read_hook_input()`을 사용하도록
+  바꿨다(2026-09-26 1차에서 이미 추가된 함수). 차단 없음·`additionalContext`만 출력이라는 기존
+  계약은 그대로다.
+- **CLAUDE.md "Agent 모델 선택"**을 에이전트 표(정본) 중심으로 다시 썼고, `pm` 행에는 이 저장소
+  `pm.md`가 실제로 갖는 Codex MCP 도구를 반영했다. 자동 협업 Hook 표의 `agent-router.py` 설명도
+  갱신했다. 훅 개수는 원래부터 표 참조 서술이라 하드코딩 정리는 불필요했다.
+- **테스트**: 4인 이하 템플릿의 작업 유형 분류(우선순위 포함)·스킬/모델 힌트 동시 출력·무관 입력
+  무출력·frontmatter model 검증 테스트 4개를 이 저장소 `tests/test_hooks.py`에 옮겼다(스킬 힌트
+  기대값은 이 저장소 `SKILL_HINTS`, `agent-router` 테스트는 이미 있는 5개 에이전트만 검증).
+- **보관 상태는 유지한다.** 실제 저장소에서 멀티 에이전트 위임을 실행해 검증하지는 않았다(기준
+  템플릿에서 이미 검증된 구현을 옮김).
+
 ## 2026-09-26 (Codex MCP 연동을 4인 이하 템플릿 기준으로 최신화 — 보관 상태 유지)
 
 - **배경**: `.mcp.json`이 전역 CLI의 `codex mcp-server`를 등록하고 있었는데 Codex CLI 0.154.0에서 이
