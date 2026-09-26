@@ -16,8 +16,9 @@ VS Code 내장 터미널의 Claude Code CLI 환경에서는 볼드 소제목/섹
 
 - **Claude Code**: 각 팀원의 오케스트레이터 + 리서치. 요구사항 파악, 계획 수립, 코드 작성, WebSearch를 통한
   리서치를 담당합니다.
-- **Codex CLI**: 리뷰 전담. `mcp__codex__codex` 도구를 통해 Claude가 직접 호출하며, 구현 전 상담·구현 후
-  리뷰·막혔을 때 세컨드 오피니언 역할을 합니다.
+- **Codex CLI**: 리뷰 전담. MCP 도구 `mcp__codex__codex`(이어가기 `mcp__codex__codex-reply`)로 Claude가
+  직접 부르며, 구현 전 상담·구현 후 리뷰·막혔을 때 세컨드 오피니언 역할을 합니다. 호출은 항상
+  `sandbox: read-only`·`approval-policy: never`이며 `codex-disable-plugins.py` 훅이 이를 강제합니다.
 - **팀원 간 협업**: 브랜치 기반 워크플로 + PR 리뷰 + `.claude/docs/OWNERSHIP.md` 담당 영역으로 여러 명이
   동시에 작업할 때의 충돌을 줄입니다.
 - 역할 분담의 세부 기준은 [.claude/rules/codex-delegation.md](.claude/rules/codex-delegation.md)와
@@ -54,8 +55,10 @@ Agent 도구로 서브에이전트를 띄울 때, `subagent_type`이 `claude`(�
 
 ## 자동 협업 Hook
 
-`.claude/hooks/`의 8개 Python hook은 **차단 없이 제안/기록만 출력**합니다 (`log-codex-call.py` 제외).
-실제로 Codex를 호출할지, 브랜치를 바꿀지는 Claude/사용자가 상황을 보고 스스로 판단합니다.
+`.claude/hooks/`의 Python hook(아래 표가 정본)은 **차단 없이 제안/기록만 출력**합니다 (`log-codex-call.py`는
+기록만, `codex-disable-plugins.py`는 예외적으로 입력을 고치고 이상 입력은 차단). 실제로 Codex를 호출할지,
+브랜치를 바꿀지는 Claude/사용자가 상황을 보고 스스로 판단합니다. 제안은 `additionalContext`로만 전달하고
+`permissionDecision`은 출력하지 않습니다(2026-09-20 수정, 계약은 `tests/test_hooks.py`가 고정).
 
 | Hook | 시점 | 역할 |
 |---|---|---|
@@ -66,7 +69,8 @@ Agent 도구로 서브에이전트를 띄울 때, `subagent_type`이 `claude`(�
 | check-codex-after-plan.py | 계획 확정 후 | Codex에게 계획 리뷰를 받을지 제안 |
 | post-implementation-review.py | 구현 후 | Codex 코드 리뷰 제안 |
 | post-test-analysis.py | 테스트 실행 후 | 테스트 실패 시 Codex 원인 분석 제안 |
-| log-codex-call.py | Codex MCP 도구 호출 전/후 | 실제 Codex 호출 시작/종료를 기록 (제안이 아니라 실호출 로그) |
+| codex-disable-plugins.py | `mcp__codex__codex` 호출 직전 | `sandbox=read-only`·`approval-policy=never`와 Codex 플러그인·`node_repl` 차단 `config`를 강제 (`updatedInput`, 이상 입력은 종료 코드 2로 차단 — fail-closed) |
+| log-codex-call.py | `mcp__codex__*` 호출 전/후/실패 | 실제 Codex 호출 시작/종료와 토큰 사용량을 기록 (제안이 아니라 실호출 로그, 응답이 JSON 문자열이어도 파싱) |
 
 ## 스킬
 
@@ -81,10 +85,16 @@ Agent/Skill/Orchestrator/Test/Evolution 구조로 만드는 별도 스킬로, �
 `.codex/AGENTS.md`는 Codex CLI용 컨텍스트 문서이며, `.codex/skills/context-loader/`는
 Codex가 `.claude/` 아래의 규칙·설계 문서를 동일하게 로드하도록 안내합니다.
 
-Codex는 `.mcp.json`에 프로젝트 MCP 서버(`codex mcp-server`)로 등록되어 있어 저장소를
-클론하면 바로 연결됩니다. 다만 인증은 팀원별로 공유되지 않으며, 각자 자기 계정으로
-`codex login`을 한 번 실행해야 합니다 (자세한 절차는 [README.md](README.md) "시작하기" 참고).
-`.mcp.json`이 없으면 `mcp__codex__codex` 도구 자체가 존재하지 않아 Codex 위임이 불가능해집니다.
+Codex는 `.mcp.json`에 프로젝트 MCP 서버로 등록돼 있다(`npx -y @openai/codex@0.153.4 mcp-server` —
+`codex mcp-server`가 Codex CLI 0.154.0에서 삭제돼 마지막 지원 버전을 고정, 2026-09-26). 저장소를
+클론하면 `mcp__codex__codex`·`mcp__codex__codex-reply` 도구가 바로 생기며, 인증은 팀원별로 공유되지
+않으므로 각자 자기 계정으로 `npx -y @openai/codex@0.153.4 login`을 한 번 실행해야 한다(OS별 `command`
+조정과 절차는 [README.md](README.md) "시작하기" 참고). `.mcp.json`이 없으면 `mcp__codex__codex` 도구
+자체가 존재하지 않아 Codex 위임이 불가능해진다. Codex 호출 경로는 이 MCP 도구뿐이다.
+
+`.claude/hooks/codex-disable-plugins.py`(PreToolUse, matcher `mcp__codex__codex`)가 호출마다
+`sandbox=read-only`·`approval-policy=never`와 플러그인·`node_repl` 차단 `config`를 강제한다. 훅이 못 뜨는
+경우를 대비해 호출할 때도 두 값을 직접 적는다. 호출 규칙은 [codex-delegation.md](.claude/rules/codex-delegation.md).
 
 ## 브랜치 · PR · 오너십
 
@@ -98,8 +108,9 @@ Codex는 `.mcp.json`에 프로젝트 MCP 서버(`codex mcp-server`)로 등록되
 
 - **CI**: `.github/workflows/ci.yml`이 push/PR마다 `ruff check`, `ruff format --check`, `mypy`, `pytest`를
   실행합니다 (동시 push가 잦은 팀 환경을 고려해 `concurrency` 그룹으로 중복 실행을 취소합니다).
-  `src/`, `tests/`에는 최소 예제(`src/my_project`, `tests/test_my_project.py`)가 포함되어 있어 항상
-  통과하며, `/init` 스킬로 실제 프로젝트로 바꿀 때 이 예제를 실제 코드로 교체합니다.
+  `src/`, `tests/`에는 최소 예제(`src/my_project`, `tests/test_my_project.py`)와 훅 회귀 테스트
+  (`tests/test_hooks.py`)가 포함되어 있어 항상 통과하며, `/init` 스킬로 실제 프로젝트로 바꿀 때
+  예제는 실제 코드로 교체합니다(훅 테스트는 유지).
 - **pre-commit**: `.pre-commit-config.yaml`에 ruff check/format, mypy가 로컬 hook으로 등록되어 있습니다.
   `uv run pre-commit install`로 최초 1회 활성화합니다 ([dev-environment.md](.claude/rules/dev-environment.md)).
 - **에디터**: `.vscode/settings.json`, `.vscode/extensions.json`으로 ruff/mypy 확장 및 저장 시 자동 포맷을

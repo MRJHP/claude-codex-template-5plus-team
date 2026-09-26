@@ -3,6 +3,39 @@
 이 프로젝트에서 진행한 작업을 날짜순으로 기록한다. 커밋 메시지의 "무엇을"보다
 "왜 그렇게 결정했는지"를 남기는 데 초점을 둔다.
 
+## 2026-09-26 (Codex MCP 연동을 4인 이하 템플릿 기준으로 최신화 — 보관 상태 유지)
+
+- **배경**: `.mcp.json`이 전역 CLI의 `codex mcp-server`를 등록하고 있었는데 Codex CLI 0.154.0에서 이
+  서브커맨드가 삭제돼 Codex 연동이 동작하지 않았다. 4인 이하 템플릿이 같은 날 MCP `codex`를 npx 고정
+  버전으로 다시 등록하고 실호출로 검증했으므로, 그 구현을 이 저장소 구조(5인 팀용 훅·규칙)에 맞춰
+  옮겼다. 이 저장소는 원래부터 MCP 구성이라 `codex exec` 경로는 없었다.
+- **`.mcp.json`**: `cmd /c npx -y @openai/codex@0.153.4 mcp-server`(마지막 지원 버전 고정, 전역 CLI
+  버전과 무관). Windows용 형태이며 다른 OS 조정법과 로그인(`npx -y @openai/codex@0.153.4 login`)은
+  README에 적었다.
+- **`codex-disable-plugins.py` 추가**(PreToolUse, matcher `mcp__codex__codex`, timeout 10초): MCP
+  `codex`는 `sandbox` 생략 시 `workspace-write`로 열려 "리뷰 전담" 규칙과 충돌하므로 호출마다
+  `sandbox=read-only`·`approval-policy=never`와 플러그인·`node_repl` 차단 `config`를 덮어쓴다. 이상
+  입력은 종료 코드 2로 막는다(fail-closed). `permissionDecision`은 내지 않는다. 기존 `mcp__codex__.*`
+  로그 훅 등록은 그대로 뒀다.
+- **`log-codex-call.py` 교체**: Claude Code가 MCP 결과를 훅에 **JSON 문자열**로 넘겨(4인 이하 템플릿
+  실측) 기존 코드의 `tool_response.get("threadId")`는 문자열에서 죽거나 사용량을 못 찾았다. 문자열·
+  dict·content 블록 목록을 모두 파싱하고, `tool_name` 접두어(`mcp__codex__`)로 판별하며, threadId
+  형식 검증(glob 주입 방지)·rollout 비-dict 라인 방어·`is_interrupt`/`is_error`/PostToolUseFailure의
+  fail 판정을 넣었다. `_hooklog.py`에 `read_hook_input()`/`as_dict()`를 추가했다(기존 함수는 그대로).
+- **제안 훅 4개**: 문구를 "MCP 도구 mcp__codex__codex를 호출해"로 통일했다.
+- **`tests/test_hooks.py` 신설**: 권한 키 비출력 계약(`check-branch-before-write` 포함, 소스 정적 검사),
+  log-codex-call(Pre/Post/Failure/interrupt, rollout 사용량, JSON 문자열 응답, 비-Codex 도구 무시,
+  threadId 검증), codex-disable-plugins(강제 값, config 보존, fail-closed 8종). 이 저장소 제안 훅에는
+  세션당 dedup이 없어 그 테스트는 옮기지 않았다.
+- **문서**: README(복귀 전 확인 블록·Codex 연동 절)·CLAUDE.md(협업 구조·Hook 표·Codex 설정, 훅 개수
+  하드코딩을 표 참조로)·`codex-delegation.md`(호출 경로 절, 읽기 전용 프롬프트 지침)·`codex-system`·
+  `general-purpose`·`plan`·`startproject`·`.codex/` 문서를 갱신했다. 팀 협업·브랜치·오너십 내용은
+  그대로다.
+- 보관 상태는 유지한다. 폴더 위치만 `_templates/_archive/`에서 `_templates/` 바로 아래로 옮겼다.
+- **알려진 한계**: npm에서 `@openai/codex@0.153.4`가 내려가면 서버가 뜨지 않는다. 훅 프로세스가 못 뜨는
+  경우는 막을 수 없어 호출할 때도 `sandbox`·`approval-policy`를 직접 적는다. 이 저장소에서 실호출
+  검증은 하지 않았다(기준 템플릿에서 검증된 구현을 옮김).
+
 ## 2026-09-20 (보관 상태 점검 — 권한 우회 훅 수정)
 
 - **PreToolUse 훅 3개(`check-codex-before-write.py`, `check-codex-after-plan.py`,
