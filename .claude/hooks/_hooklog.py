@@ -8,11 +8,26 @@
 """
 
 import json
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 LOG_PATH = Path(__file__).resolve().parent.parent / "logs" / "hooks.jsonl"
+
+
+def read_hook_input() -> dict[str, Any]:
+    """훅 stdin(JSON)을 dict로 읽는다. 비었거나 깨졌거나 최상위가 객체가 아니면 빈 dict."""
+    try:
+        data = json.loads(sys.stdin.read() or "{}")
+    except json.JSONDecodeError:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def as_dict(value: object) -> dict[str, Any]:
+    """중첩 필드(tool_input 등)가 객체가 아니면 빈 dict — `.get()` 호출이 훅을 죽이지 않게 한다."""
+    return value if isinstance(value, dict) else {}
 
 
 def log_event(

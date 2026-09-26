@@ -2,8 +2,12 @@
   "mcpServers": {
     "codex": {
       "type": "stdio",
-      "command": "codex",
+      "command": "cmd",
       "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@openai/codex@0.153.4",
         "mcp-server"
       ],
       "env": {}
