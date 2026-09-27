@@ -120,6 +120,31 @@ def _response_payload(tool_response: object) -> dict[str, Any]:
     return {}
 
 
+def _is_error_response(tool_response: object) -> bool:
+    """tool_response에 is_error:true가 있는지 확인한다.
+
+    `_response_payload`와 달리 `structuredContent`로 무조건 내려가지 않는다 —
+    거기 `threadId`가 있으면 바깥 dict(및 바깥의 `is_error`)를 통째로 버리기
+    때문에, 최상위 `is_error`를 먼저 보고 없을 때만 `structuredContent`를 본다.
+    """
+    if isinstance(tool_response, str):
+        try:
+            return _is_error_response(json.loads(tool_response))
+        except json.JSONDecodeError:
+            return False
+    if isinstance(tool_response, list):
+        return any(
+            _is_error_response(text)
+            for block in tool_response
+            if isinstance(text := as_dict(block).get("text"), str)
+        )
+    if isinstance(tool_response, dict):
+        if tool_response.get("is_error"):
+            return True
+        return bool(as_dict(tool_response.get("structuredContent")).get("is_error"))
+    return False
+
+
 def extract_thread_id(tool_response: object) -> str | None:
     """tool_response에서 threadId를 뽑는다. 형식(16진수·하이픈)이 아니면 무시한다."""
     thread_id = _response_payload(tool_response).get("threadId")
@@ -206,7 +231,7 @@ def main() -> None:
     failed = (
         hook_event == "PostToolUseFailure"
         or bool(data.get("is_interrupt"))
-        or bool(as_dict(tool_response).get("is_error"))
+        or _is_error_response(tool_response)
     )
 
     usage_payload: dict[str, Any] | None = None
