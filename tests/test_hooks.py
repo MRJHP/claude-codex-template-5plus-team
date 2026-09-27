@@ -582,6 +582,39 @@ def test_log_codex_call_reads_usage_when_response_is_json_string(
     assert entries[-1]["usage"]["total"] == 1500
 
 
+def test_log_codex_call_logs_fail_when_json_string_response_has_is_error(
+    run_hook: HookRunner,
+) -> None:
+    payload = {
+        **CODEX_CALL,
+        "hook_event_name": "PostToolUse",
+        "tool_response": json.dumps({"threadId": "abc123", "is_error": True}),
+    }
+
+    _, entries = run_hook("log-codex-call", payload)
+
+    assert entries[-1]["status"] == "fail"
+
+
+def test_log_codex_call_logs_fail_when_structured_content_has_thread_id_and_top_level_is_error(
+    run_hook: HookRunner,
+) -> None:
+    # structuredContent에 threadId가 있어도 바깥 is_error를 놓치면 안 된다
+    # (Codex 리뷰로 발견된 회귀, PR #24 후속).
+    payload = {
+        **CODEX_CALL,
+        "hook_event_name": "PostToolUse",
+        "tool_response": {
+            "is_error": True,
+            "structuredContent": {"threadId": "abc123"},
+        },
+    }
+
+    _, entries = run_hook("log-codex-call", payload)
+
+    assert entries[-1]["status"] == "fail"
+
+
 @pytest.mark.parametrize(
     "response",
     [
