@@ -215,6 +215,11 @@ def test_log_event_defaults_status_from_triggered(hooklog: ModuleType) -> None:
     [
         ("src/auth 아래 파일 어디에 있어?", "explorer", "Haiku"),
         ("현황 정리해서 보여줘", "explorer", "Haiku"),
+        # 담당 영역·진행 상황 조회는 explorer가 아니라 pm (PR #25 Codex 리뷰 지적)
+        ("누구 담당인지 확인해줘", "pm", "Sonnet"),
+        ("프로젝트 진행상황 정리해줘", "pm", "Sonnet"),
+        # 구현 키워드가 함께 있으면 pm보다 implementer가 우선한다
+        ("진행상황 확인하고 버그도 고쳐줘", "implementer", "Sonnet"),
         ("로그인 버그 고쳐줘", "implementer", "Sonnet"),
         # 조사와 구현이 섞이면 구현
         ("설정 파일 찾아서 수정해줘", "implementer", "Sonnet"),
